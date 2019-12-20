@@ -100,6 +100,16 @@ class Post extends ComponentBase
             $this->setStatusCode(404);
             return $this->controller->run('404');
         }
+        // Resolving category slug issue
+        if($post->categories->count() && $this->param('category')) {
+            if(false === $post->categories->pluck('slug')->search($this->param('category'))) {
+                $canonicalUrl = $this->controller->pageUrl($this->page->baseFilename, [
+                    'category' => $post->categories[0]->slug,
+                    'slug' => $post->slug
+                    ]);
+                return response()->redirectTo($canonicalUrl)->send();
+            }
+        }
 
         /*
          * Add a "url" helper attribute for linking to each category
